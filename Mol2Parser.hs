@@ -11,9 +11,19 @@ import Debug.Trace
 tiposPrefix = "@<TRIPOS>"
 data ReadState = StartState | InState | EndState
 
-getFormula xs = map (\x -> (head x, length x)) $ group . sort $ map (last . take 6 . words) $ getAtoms xs
+getFormula xs = map (\x -> (head x, length x)) $
+  group . sort $
+    map (last . take 6 . words) $
+      getAtoms xs
+
 getAtoms xs = getBlock "ATOM" xs
-getBonds xs = foldl (\acc row -> ((\(c1:c2:c3:c4:rest) -> ((read c2::Int, read c3::Int), read c4::Int))(words row)) : acc) [] $ getBlock "BOND" xs
+
+getBonds::[[Char]] -> [((Int, Int), Int)]
+getBonds xs = foldl
+  (\acc row ->
+    ((\(c1:c2:c3:c4:rest) -> ((read c2, read c3), if (c4 == "ar") then 2 else read c4)) (words row)) : acc)
+  []
+  (getBlock "BOND" xs)
 
 -------------------------------
 --- Returns block rows
